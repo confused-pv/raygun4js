@@ -1,37 +1,55 @@
 # Raygun4js
 
-Raygun.io plugin for JavaScript
+Forked version of Raygun is added to provide the sourcemap integration for mobile platforms.
 
-## Getting Started
+It extends the source map functionality provided by Raygun for web version for all the frotend Hybrid apps e.g; Ionic.
 
-### With Bower
+## How it works.
 
-Run `bower install raygun4js`
+I assuming you have fare idea of how Raygun plugin works. Else take a look at its documentation below or at https://github.com/MindscapeHQ/raygun4js.
 
-### CDN
+Please read https://raygun.io/blog/2014/02/getting-started-with-javascript-source-maps/ for detailed description on how sourcemap works in Raygun.
 
-Raygun4JS is now available from our content delivery network:
 
-```html
-<script type="text/javascript" src="http://cdn.raygun.io/raygun4js/raygun.min.js"></script>
+All platforms put different url in the sourcemap that is uploaded to Raygun :
+
+a. ANDROID : file:///android_asset/www/scripts/application-scripts.min.js
+b. IOS : file:///private/var/mobile/Containers/Bundle/Application/{{uuid}}/Hybrid.app/www/scripts/application-scripts.min.js
+
+And the device URL is published as : file:///android_asset/www/index.html
+
+We face three major issues : 
+
+1. In case of ios all device would have different url and hence finding sourcemap is litteraly becomes impossible.
+2. Device url and sourcemap url is different hence mapping can not be done even in case of android. Notice Device url has <b>"index.html"</b>.
+Hence we need to remove the index.html from Device URL if we need a proper mapping between sourcemap and stactrace.
+3. Plugin to fecilitate this wthout any issue.
+
+Hence to solve all problem I have updated the plugin to make sure sourcemap can be created without any issue :
+
+I have added four new values in "options" parameter passed while initialization of Raygun.
+
+1. domainName : These could be any domain name with which mobile app will send the stacktrace to raygun. 
+As we need a global url to fetch the sourcemap for the stacktrace we need to replace the local URL of mobile platform with global URL.
+
+2. platformType : [IOS/ANDROID/WEB] : As release to all the platforms can happen at different point of time, its a good idea to keep the sourcemap for all with different relative URI.
+
+3. versionNumber : To map the sourcemap of different version with the stacktrace.
+
+4. landingPage : index.html as described in example above. The landing page is replaced from the above device URL and hence device URL and stacktrace URL becomes same.
+
+So final url to which the stacktrace is uploaded to Raygun is summation of all the 3 points mentioned above.
+
+So suppose I initialized Raygun with following 
+```options 
+{"domainName":"https://raygun-mobile-sourcemap.com", "platformType":"IOS", "versionNumber":"v1.3", "landingPage":"index.html"}
+```
+Final Url Will be :
+```URL
+https://raygun-mobile-sourcemap.com/IOS/v1.3
 ```
 
-You can reference any of the scripts below. The scripts in the /raygun4js/ directory will always be the latest release, and specific releases are available undern /raygun4js/1.x.x/.
-
-### From NuGet
-
-Visual Studio users can get it by opening the Package Manager Console and typing `Install-Package raygun4js`
-
-### Manual download
-
-Download the [production version][min] or the [development version][max]. You can also download a version without
-the jQuery hooks if you are not using jQuery or you wish to provide your own hooks. Get this as a
-[production version][min.vanilla] or [development version][max.vanilla].
-
-[min]: https://raw.github.com/MindscapeHQ/raygun4js/master/dist/raygun.min.js
-[max]: https://raw.github.com/MindscapeHQ/raygun4js/master/dist/raygun.js
-[min.vanilla]: https://raw.github.com/MindscapeHQ/raygun4js/master/dist/raygun.vanilla.min.js
-[max.vanilla]: https://raw.github.com/MindscapeHQ/raygun4js/master/dist/raygun.vanilla.js
+Hence the stacktrace now uploaded to Raygun will try to resolve the sourcemap from the files uploaded at above URL in raygun.
 
 ## Usage
 
