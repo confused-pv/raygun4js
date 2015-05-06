@@ -3,7 +3,7 @@
   "main": "dist/raygun.js",
   "title": "Raygun4js",
   "description": "Raygun.io plugin for JavaScript Mobile Development",
-  "version": "1.18.3",
+  "version": "1.19.0",
   "homepage": "https://github.com/confused-pv/raygun4js",
   "author": "confused-pv <prakhar007@gmail.com>",
   "repository": {
