@@ -536,14 +536,15 @@ var raygunFactory = function (window, $, undefined) {
       }
     }
 
+    var customUrl = [location.protocol, '//', location.host, location.pathname, location.hash].join('');
     if( _domainName ){
 
-      var customUrl = _domainName;//e.g; http://raygun-mobile-sourcemap.com
+      customUrl = _domainName;//e.g; http://raygun-mobile-sourcemap.com
       if(_platformType){ customUrl += "/" + _platformType; }//e.g; http://raygun-mobile-sourcemap.com/IOS
       if(_versionNumber){ customUrl += "/" + _versionNumber; }//e.g; http://raygun-mobile-sourcemap.com/IOS/v1.3
 
       var requestUrl = [location.protocol, '//', location.host, location.pathname].join('');//creates the device url.      
-      requestUrl = requestUrl.replace(_landingPage, '');//e.g; index.html or main.html
+      requestUrl = requestUrl.replace("/"+_landingPage, '');//e.g; index.html or main.html
       //requestUrl will be transformed from file:///android_asset/www/index.html to file:///android_asset/www/
 
       if (stackTrace.stack && stackTrace.stack.length) {
@@ -659,7 +660,7 @@ var raygunFactory = function (window, $, undefined) {
         'UserCustomData': finalCustomData,
         'Tags': options.tags,
         'Request': {
-          'Url': [location.protocol, '//', location.host, location.pathname, location.hash].join(''),
+          'Url': customUrl,
           'QueryString': qs,
           'Headers': {
             'User-Agent': navigator.userAgent,
