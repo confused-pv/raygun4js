@@ -1,4 +1,4 @@
-/*! Raygun4js - v1.18.3 - 2015-05-01
+/*! Raygun4js - v1.18.3 - 2015-05-05
 * https://github.com/MindscapeHQ/raygun4js
 * Copyright (c) 2015 MindscapeHQ; Licensed MIT */
 (function(window, undefined) {
@@ -1231,6 +1231,10 @@ var raygunFactory = function (window, $, undefined) {
       _excludedHostnames = null,
       _excludedUserAgents = null,
       _filterScope = 'customData',
+      _domainName = null,
+      _platformType = null,
+      _versionNumber = null,
+      _landingPage = null,
       $document;
 
   if ($) {
@@ -1265,6 +1269,10 @@ var raygunFactory = function (window, $, undefined) {
         _disableAnonymousUserTracking = options.disableAnonymousUserTracking || false;
         _excludedHostnames = options.excludedHostnames || false;
         _excludedUserAgents = options.excludedUserAgents || false;
+        _domainName = options.domainName || false;
+        _platformType = options.platformType || false;
+        _versionNumber = options.versionNumber || false;
+        _landingPage = options.landingPage || false;
 
         if (typeof options.wrapAsynchronousCallbacks !== 'undefined') {
           _wrapAsynchronousCallbacks = options.wrapAsynchronousCallbacks;
@@ -1727,16 +1735,43 @@ var raygunFactory = function (window, $, undefined) {
       }
     }
 
-    if (stackTrace.stack && stackTrace.stack.length) {
-      forEach(stackTrace.stack, function (i, frame) {
-        stack.push({
-          'LineNumber': frame.line,
-          'ColumnNumber': frame.column,
-          'ClassName': 'line ' + frame.line + ', column ' + frame.column,
-          'FileName': frame.url,
-          'MethodName': frame.func || '[anonymous]'
+    if( _domainName ){
+
+      var customUrl = _domainName;//e.g; http://raygun-mobile-sourcemap.com
+      if(_platformType){ customUrl += "/" + _platformType; }//e.g; http://raygun-mobile-sourcemap.com/IOS
+      if(_versionNumber){ customUrl += "/" + _versionNumber; }//e.g; http://raygun-mobile-sourcemap.com/IOS/v1.3
+
+      var requestUrl = [location.protocol, '//', location.host, location.pathname].join('');//creates the device url.      
+      requestUrl = requestUrl.replace(_landingPage, '');//e.g; index.html or main.html
+      //requestUrl will be transformed from file:///android_asset/www/index.html to file:///android_asset/www/
+
+      if (stackTrace.stack && stackTrace.stack.length) {
+        forEach(stackTrace.stack, function (i, frame) {
+
+          //file:///android_asset/www/scripts/application-scripts.min.js to http://raygun-mobile-sourcemap.com/scripts/application-scripts.min.js
+          stack.push({
+            'LineNumber': frame.line,
+            'ColumnNumber': frame.column,
+            'ClassName': 'line ' + frame.line + ', column ' + frame.column,
+            'FileName': frame.url.replace(requestUrl, customUrl),
+            'MethodName': frame.func || '[anonymous]'
+          });
         });
-      });
+      }
+
+    }else{
+
+      if (stackTrace.stack && stackTrace.stack.length) {
+        forEach(stackTrace.stack, function (i, frame) {
+          stack.push({
+            'LineNumber': frame.line,
+            'ColumnNumber': frame.column,
+            'ClassName': 'line ' + frame.line + ', column ' + frame.column,
+            'FileName': frame.url,
+            'MethodName': frame.func || '[anonymous]'
+          });
+        });
+      }
     }
 
     var queryString = _private.parseUrl('?');
