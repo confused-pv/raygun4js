@@ -539,8 +539,8 @@ var raygunFactory = function (window, $, undefined) {
     if( _domainName ){
 
       var customUrl = _domainName;//e.g; http://raygun-mobile-sourcemap.com
-      if(_platformType) customUrl + "/" + _platformType; //e.g; http://raygun-mobile-sourcemap.com/IOS
-      if(_versionNumber) customUrl + "/" + _versionNumber; //e.g; http://raygun-mobile-sourcemap.com/IOS/v1.3
+      if(_platformType){ customUrl += "/" + _platformType; }//e.g; http://raygun-mobile-sourcemap.com/IOS
+      if(_versionNumber){ customUrl += "/" + _versionNumber; }//e.g; http://raygun-mobile-sourcemap.com/IOS/v1.3
 
       var requestUrl = [location.protocol, '//', location.host, location.pathname].join('');//creates the device url.      
       requestUrl = requestUrl.replace(_landingPage, '');//e.g; index.html or main.html
