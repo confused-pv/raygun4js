@@ -74,7 +74,7 @@ var raygunFactory = function (window, $, undefined) {
         _platformType = options.platformType || false;
         _versionNumber = options.versionNumber || false;
         _landingPage = options.landingPage || false;
-        
+
         if (typeof options.wrapAsynchronousCallbacks !== 'undefined') {
           _wrapAsynchronousCallbacks = options.wrapAsynchronousCallbacks;
         }
@@ -536,18 +536,43 @@ var raygunFactory = function (window, $, undefined) {
       }
     }
 
+    if( _domainName ){
 
+      var customUrl = _domainName;//e.g; http://raygun-mobile-sourcemap.com
+      if(_platformType) customUrl + "/" + _platformType; //e.g; http://raygun-mobile-sourcemap.com/IOS
+      if(_versionNumber) customUrl + "/" + _versionNumber; //e.g; http://raygun-mobile-sourcemap.com/IOS/v1.3
 
-    if (stackTrace.stack && stackTrace.stack.length) {
-      forEach(stackTrace.stack, function (i, frame) {
-        stack.push({
-          'LineNumber': frame.line,
-          'ColumnNumber': frame.column,
-          'ClassName': 'line ' + frame.line + ', column ' + frame.column,
-          'FileName': frame.url,
-          'MethodName': frame.func || '[anonymous]'
+      var requestUrl = [location.protocol, '//', location.host, location.pathname].join('');//creates the device url.      
+      requestUrl = requestUrl.replace(_landingPage, '');//e.g; index.html or main.html
+      //requestUrl will be transformed from file:///android_asset/www/index.html to file:///android_asset/www/
+
+      if (stackTrace.stack && stackTrace.stack.length) {
+        forEach(stackTrace.stack, function (i, frame) {
+
+          //file:///android_asset/www/scripts/application-scripts.min.js to http://raygun-mobile-sourcemap.com/scripts/application-scripts.min.js
+          stack.push({
+            'LineNumber': frame.line,
+            'ColumnNumber': frame.column,
+            'ClassName': 'line ' + frame.line + ', column ' + frame.column,
+            'FileName': frame.url.replace(requestUrl, customUrl),
+            'MethodName': frame.func || '[anonymous]'
+          });
         });
-      });
+      }
+
+    }else{
+
+      if (stackTrace.stack && stackTrace.stack.length) {
+        forEach(stackTrace.stack, function (i, frame) {
+          stack.push({
+            'LineNumber': frame.line,
+            'ColumnNumber': frame.column,
+            'ClassName': 'line ' + frame.line + ', column ' + frame.column,
+            'FileName': frame.url,
+            'MethodName': frame.func || '[anonymous]'
+          });
+        });
+      }
     }
 
     var queryString = _private.parseUrl('?');
